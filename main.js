@@ -1,71 +1,87 @@
-(function (window) {
-	let todoList = document.querySelector(".todo-list");
-	let addTask = window.Task.addTask;
-	//localstorage is not empty
-	if (localStorage.getItem("todo")) {
-		let dataList = JSON.parse(localStorage.getItem("todo"));
-		for (let i = 0; i < dataList.length; i++) {
-			let taskTitle = dataList[i].title;
-			let completed = dataList[i].completed;
-			addTask(todoList, taskTitle, completed);
-		}
-	}
-})(window);
+// create variables
 
-let list = document.querySelector("ul");
-let addBtn = document.querySelector(".addBtn");
+let tasks = [];
+const taskList = document.getElementById('list');
+const addTaskInput = document.getElementById('add');
+const tasksCounter = document.getElementById('tasks-counter');
+const enter = document.querySelector("#jod");
 
-list.addEventListener("click", function (event) {
-	if (event.target.tagName === "LI") {
-		event.target.classList.toggle("checked");
+// function starts here
 
-		let taskTitle = event.target.getAttribute("data-target");
+//list -section:
+function addtoDOM(task){
+    const li = document.createElement('li');
 
-		let tasksData = JSON.parse(localStorage.getItem("todo"));
-		for (let i = 0; i < tasksData.length; i++) {
-			if (taskTitle == tasksData[i].title) {
-				tasksData[i].completed = event.target.classList.contains("checked")
-					? true
-					: false;
-			}
-		}
-		localStorage.setItem("todo", JSON.stringify(tasksData));
-	}
-});
-
-function inputHandler() {
-	let inputVal = document.getElementById("taskInput").value;
-	let todoList = document.querySelector(".todo-list");
-	let data = localStorage.getItem("todo");
-	let list = [];
-	if (!inputVal) {
-		swal("Error!", "You must write something!", "error");
-		let timer = setTimeout(() => {
-			sweetAlert.close();
-		}, 1000);
-	} else {
-		//save on localStorage new Task
-		function TaskObj(title) {
-			this.title = title;
-			this.completed = false;
-		}
-
-		let task = new TaskObj(inputVal);
-
-		//update data
-		if (data) {
-			list = JSON.parse(data);
-		}
-		list.push(task);
-		localStorage.setItem("todo", JSON.stringify(list));
-
-		//create new task element in html
-		window.Task.addTask(todoList, inputVal);
-		document.getElementById("taskInput").value = "";
-	}
+    li.innerHTML = `<input type="checkbox" id="${task.id}"${task.done ? 'checked' : ''} class="chk">
+     <label class = "break" for="${task.id}">${task.text}</label>
+     <i  data-id="${task.id}" class="fa-sharp fa-solid fa-trash plus"></i>`;
+     taskList.append(li);
 }
+// for creating tasklist blank and making new list in the DOM
+function renderList () {
+    taskList.innerHTML = '';
 
-addBtn.addEventListener("click", inputHandler);
-document.addEventListener("keypress", (event) =>
-	event.key == "Enter" ? inputHandler() : null
-);
+    for(let i=0; i<tasks.length; i++){
+        addtoDOM(tasks[i]);
+    }
+    //printing task count
+    tasksCounter.innerHTML = tasks.length;
+}
+// delete function
+function deleteTask (taskId) {
+    const newtask = tasks.filter(function(task){
+        return task.id != taskId
+    });
+    tasks = newtask;
+    renderList();
+}
+//adding function
+function addtasks (task) {
+    if(task){
+        tasks.push(task);
+        renderList();
+        return;
+    }
+}
+//show alerts
+function showNotification(text) {
+    alert(text);
+}
+//funtion to calling to add section
+function keypress(){
+        const text = addTaskInput.value;
+        console.log('text' , addTaskInput.value);
+        if(text === ""){
+            showNotification("can't be empty");
+            return;
+        }
+        const task = {
+            text,
+            id: Date.now().toString(),
+            done: false
+        }
+    addTaskInput.value = '';
+    console.log(enter.value);
+        addtasks(task);
+    }
+    //function to call delete section;
+function clil(e){
+    const target = e.target;
+    if(target.className == 'fa-sharp fa-solid fa-trash plus'){
+const taskId = target.dataset.id;
+deleteTask(taskId);
+console.log(taskId)
+return;
+    }
+}
+//funtion to delete all section
+var d_all = document.querySelector(".cl");
+d_all.addEventListener('click' , ()=>{
+    taskList.innerHTML = '';
+    tasksCounter.innerHTML = 0;
+
+    return;
+})
+//click events ;
+enter.addEventListener('click' , keypress);
+document.addEventListener('click' , clil);
